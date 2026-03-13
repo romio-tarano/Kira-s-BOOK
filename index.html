@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Казка Кіри" />
+  <title>Казка Кіри ✨</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Georgia', serif;
+      background: linear-gradient(135deg, #fce4ec 0%, #f3e5f5 50%, #e8eaf6 100%);
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+    }
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      height: -webkit-fill-available;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .welcome {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 32px 24px;
+      text-align: center;
+      background: linear-gradient(160deg, #fce4ec, #f3e5f5, #e8eaf6);
+    }
+    .welcome-stars { font-size: 48px; margin-bottom: 16px; animation: float 3s ease-in-out infinite; }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .welcome-title { font-size: 28px; color: #7b1fa2; margin-bottom: 8px; line-height: 1.3; }
+    .welcome-subtitle { font-size: 15px; color: #9c27b0; font-style: italic; margin-bottom: 28px; }
+    .welcome-card {
+      background: white; border-radius: 20px; padding: 20px 22px;
+      margin-bottom: 28px; box-shadow: 0 4px 20px rgba(156,39,176,0.12); text-align: left;
+    }
+    .welcome-card-title { font-size: 14px; color: #9c27b0; font-weight: bold; margin-bottom: 12px; text-align: center; }
+    .welcome-hero { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; font-size: 14px; color: #444; line-height: 1.5; }
+    .welcome-hero-icon { font-size: 22px; flex-shrink: 0; }
+    .welcome-instruction {
+      background: linear-gradient(135deg, #f3e5f5, #e8eaf6);
+      border-radius: 14px; padding: 14px 16px; margin-bottom: 28px;
+      font-size: 14px; color: #555; line-height: 1.6; text-align: center;
+    }
+    .welcome-instruction b { color: #7b1fa2; }
+    .start-btn {
+      background: linear-gradient(135deg, #ce93d8, #9fa8da);
+      color: white; border: none; border-radius: 50px; padding: 16px 40px;
+      font-size: 18px; font-family: inherit; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(156,39,176,0.3); transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .start-btn:active { transform: scale(0.96); box-shadow: 0 2px 8px rgba(156,39,176,0.2); }
+    .header {
+      background: linear-gradient(135deg, #ce93d8, #9fa8da);
+      padding: 16px 20px 12px; text-align: center;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .header-center { flex: 1; }
+    .header-title { font-size: 20px; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .header-subtitle { font-size: 11px; color: rgba(255,255,255,0.85); margin-top: 2px; font-style: italic; }
+    .header-restart { background: none; border: none; font-size: 22px; cursor: pointer; padding: 4px; opacity: 0.8; transition: opacity 0.2s; }
+    .header-restart:hover { opacity: 1; }
+    .chat-area {
+      flex: 1; overflow-y: auto; padding: 16px 12px;
+      display: flex; flex-direction: column; gap: 14px; -webkit-overflow-scrolling: touch;
+    }
+    .message { display: flex; flex-direction: column; max-width: 88%; animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .message.narrator { align-self: flex-start; }
+    .message.kira { align-self: flex-end; }
+    .message-label { font-size: 11px; color: #9e9e9e; margin-bottom: 4px; padding: 0 4px; }
+    .message.kira .message-label { text-align: right; }
+    .message-bubble { padding: 13px 17px; border-radius: 18px; font-size: 15px; line-height: 1.7; white-space: pre-wrap; }
+    .message.narrator .message-bubble {
+      background: white; color: #333; border-bottom-left-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .message.kira .message-bubble {
+      background: linear-gradient(135deg, #ce93d8, #b39ddb);
+      color: white; border-bottom-right-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .typing-indicator {
+      align-self: flex-start; background: white; border-radius: 18px;
+      border-bottom-left-radius: 4px; padding: 14px 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; gap: 5px; align-items: center;
+    }
+    .typing-dot { width: 8px; height: 8px; background: #ce93d8; border-radius: 50%; animation: bounce 1.2s infinite; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-6px); }
+    }
+    .input-area {
+      background: white; padding: 12px; border-top: 1px solid #f0f0f0;
+      display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+    }
+    .input-field {
+      flex: 1; border: 2px solid #e1bee7; border-radius: 22px;
+      padding: 10px 16px; font-size: 15px; font-family: inherit;
+      resize: none; outline: none; max-height: 100px; line-height: 1.4;
+      color: #333; transition: border-color 0.2s;
+    }
+    .input-field:focus { border-color: #ce93d8; }
+    .input-field::placeholder { color: #ccc; }
+    .send-btn {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: linear-gradient(135deg, #ce93d8, #9fa8da);
+      border: none; color: white; font-size: 20px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      transition: transform 0.15s, opacity 0.15s; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .send-btn:active { transform: scale(0.92); }
+    .send-btn:disabled { opacity: 0.5; cursor: default; }
+    .error-msg {
+      background: #fff3e0; color: #e65100; padding: 10px 14px;
+      border-radius: 12px; font-size: 13px; text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <div class="welcome" v-if="screen === 'welcome'">
+    <div class="welcome-stars">🧚✨🌟</div>
+    <div class="welcome-title">Казка спеціально<br>для Кіри 💜</div>
+    <div class="welcome-subtitle">від мами і тата з великою любов'ю</div>
+    <div class="welcome-card">
+      <div class="welcome-card-title">✨ Твої друзі у пригоді</div>
+      <div class="welcome-hero">
+        <span class="welcome-hero-icon">⭐</span>
+        <span><b>Люм</b> — маленький клубок-комета. Він живе на твоєму плечі, золотіє від радості і синіє від страху.</span>
+      </div>
+      <div class="welcome-hero">
+        <span class="welcome-hero-icon">🐱</span>
+        <span><b>Тала</b> — чарівне кошеня з крильцями і хвостом-пензликом. Мудра, але трохи вередлива.</span>
+      </div>
+      <div class="welcome-hero">
+        <span class="welcome-hero-icon">🌑</span>
+        <span><b>Морок</b> — темний дух лісу. Спочатку він здається страшним... але все залежить від тебе.</span>
+      </div>
+    </div>
+    <div class="welcome-instruction">
+      Казкар розповідатиме тобі пригоду.<br>
+      Коли він запитає <b>«Що ти робиш?»</b> —<br>
+      напиши що хочеш зробити,<br>
+      і казка піде саме твоїм шляхом! 🌿
+    </div>
+    <button class="start-btn" @click="startStory">Почати пригоду! ✨</button>
+  </div>
+
+  <template v-if="screen === 'chat'">
+    <div class="header">
+      <div style="width:36px"></div>
+      <div class="header-center">
+        <div class="header-title">🧚 Казка Кіри ✨</div>
+        <div class="header-subtitle">від мами і тата з любов'ю 💜</div>
+      </div>
+      <button class="header-restart" @click="confirmRestart" title="Нова казка">🔄</button>
+    </div>
+    <div class="chat-area" ref="chatArea">
+      <div v-for="(msg, i) in messages" :key="i" :class="['message', msg.role]">
+        <div class="message-label">{{ msg.role === 'narrator' ? '🧚 Казкар' : '👧 Кіра' }}</div>
+        <div class="message-bubble">{{ msg.text }}</div>
+      </div>
+      <div class="typing-indicator" v-if="loading">
+        <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+      </div>
+      <div class="error-msg" v-if="error">{{ error }}</div>
+    </div>
+    <div class="input-area">
+      <textarea
+        class="input-field"
+        v-model="userInput"
+        placeholder="Що робить Кіра?.. ✨"
+        rows="1"
+        @keydown.enter.prevent="send"
+        :disabled="loading"
+      ></textarea>
+      <button class="send-btn" @click="send" :disabled="loading || !userInput.trim()">▶</button>
+    </div>
+  </template>
+
+</div>
+
+<script>
+const { createApp, ref, nextTick, onMounted } = Vue;
+
+// ===== GROQ API =====
+const API_KEY = "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"; // gsk_...
+const API_URL = "https://api.groq.com/openai/v1/chat/completions";
+const MODEL   = "meta-llama/llama-4-scout-17b-16e-instruct";
+// ====================
+
+const STORAGE_KEY = "kira_story_v4";
+
+const SYSTEM_PROMPT = `МОВА: Відповідай ВИКЛЮЧНО українською мовою. НІКОЛИ не використовуй англійську. Навіть якщо користувач пише іншою мовою — відповідай лише українською.
+
+РОЛЬ: Ти — Казкар. Ти розповідаєш живу інтерактивну казку для дівчинки Кіри (7 років). Ти НІКОЛИ не виходиш з ролі. НІКОЛИ не кажеш "As an AI", "Я мовна модель", "Я не можу" або будь-що подібне. Ти просто Казкар — і більше нічого.
+
+ГОЛОВНЕ ПРАВИЛО — ЗВЕРТАННЯ:
+1. Кіра — це гравець, якому ти пишеш. Звертайся до неї ТІЛЬКИ на "ти".
+2. ЗАБОРОНЕНО писати "Кіра зробила", "Кіра пішла" — тільки "ти зробила", "ти пішла".
+3. Ім'я "Кіра" можна використовувати ТІЛЬКИ в прямій мові інших персонажів: — Кіро, обережно! — крикнув Люм.
+
+ПЕРСОНАЖІ — їх характер незмінний:
+- ЛЮМ: маленький пухнастий клубок-комета, живе на плечі у Кіри. Говорить короткими емоційними фразами: "Кіро, там хтось є!", "Ура!", "Не подобається мені це...". Золотіє від радості, синіє від страху, блимає коли хвилюється.
+- ТАЛА: кошеня з прозорими крильцями і хвостом-пензликом. Майже не говорить — спілкується діями: вуха вперед = цікавість, хвіст малює зигзаги = небезпека, лягає = відмовляється йти далі. Іноді каже одне коротке слово.
+- МОРОК: темний дух лісу. На початку — загрозливий, холодний, говорить уривками. Але він НЕ є злим назавжди. Якщо Кіра проявляє доброту або сміливість — він поступово м'якшає. Його трансформація — серце казки.
+
+ПРАВИЛА ОПОВІДІ:
+1. Пиши як найкращий друг що розповідає казку перед сном — тепло, з любов'ю, без страшних моментів.
+2. Прості слова і короткі речення — Кірі 7 років.
+3. Обов'язково описуй: кольори, запахи, звуки, відчуття на дотик.
+4. Показуй емоції через тіло: "ти затамувала подих", "серце застрибало", "ти мимоволі посміхнулась".
+5. Люм і Тала ЖИВО реагують на кожну важливу подію — не забувай про них.
+6. Що б Кіра не написала — прийми це і красиво вплети в казку. Ніколи не відмовляй і не кажи "так не можна".
+7. Паличку мрії можна знайти ТІЛЬКИ після щонайменше 4-5 ходів і після доброго вчинку або сміливого рішення.
+
+ДОВЖИНА ВІДПОВІДЕЙ:
+- Ходи 1-3: 15-20 речень. Багато атмосфери, знайомство зі світом.
+- Ходи 4-8: 10-15 речень. Більше динаміки і діалогів.
+- Зустріч з Мороком і фінал: 18-22 речення. Це кульмінація — розкрий її повністю.
+
+КІНЕЦЬ КОЖНОЇ ВІДПОВІДІ — ОБОВ'ЯЗКОВО:
+Постав одне живе запитання що відповідає ситуації:
+"Що ти робиш далі? ✨"
+"Куди ти йдеш? ✨"  
+"Що ти скажеш Мороку? ✨"
+"Чи підходиш ближче? ✨"
+Якщо ситуація складна або незрозуміла — додай підказку від Люма або Тали перед запитанням.
+
+ЗАБОРОНЕНО:
+- Виходити з ролі Казкаря
+- Писати англійською
+- Відмовляти Кірі у будь-якій дії
+- Використовувати страшні або сумні кінцівки
+- Писати менше 10 речень`;
+
+const OPENING = `Кіро, сьогодні вранці в Школі чарів пахло корицею і чимось таємничим — наче хтось розсипав зіркового пилу просто біля дверей. Фея Фіалка, директорка школи, змахнула срібними крилами і сказала: «Сьогодні ми вчимося малювати чарівні карти! Карта, намальована з серцем, завжди приведе до мети!»
+
+Ти взяла найкращий пензель і задумалась. Спочатку намалювала золотий ліс із деревами до самого неба. Потім — річку зі зірок що біжить між пагорбами. І нарешті — маленький замок на найвищому пагорбі, з вікном що світиться теплим жовтим світлом. Коли ти поставила останню крапку... малюнок затремтів! Золоті дерева на папері тихенько зашелестіли, наче від справжнього вітру. Дівчатка навколо ахнули.
+
+Після уроків ти залишилась прибирати фарби. Саме тоді під партою ти помітила слабкий блиск — наче хтось загубив шматочок зірки. Ти присіла і побачила маленький кристал. Він був теплий на дотик і прозорий, як крапелька застиглого місячного світла. Ти взяла його в долоню...
+
+І раптом з кристала вихнув іскристий золотий хвіст — а за ним викотився маленький пухнастий клубок світла! Він зупинився прямо перед тобою, кліпнув двома великими круглими оченятами і тихо муркнув — саме так, як муркоче котик якого щойно погладили.
+
+— Ти... живий? — ти присіла навпочіпки.
+
+Клубок засяяв теплим золотим світлом і ткнувся тобі в ніс. Ти засміялась.
+
+— Я назву тебе Люм!
+
+Люм радісно крутнувся і залишив у повітрі веселковий іскристий слід — прямо як маленька комета. Потім стрибнув тобі на плече і замуркотів так голосно що аж задзвеніли фарби на столі. А кристал ще раз блимнув і прошепотів голосом схожим на шелест вітру: «Чарівну паличку мрії вкрав Морок... знайди її у Лісі Загадок... разом...»
+
+Ти стиснула кристал у долоні. Серце забилось швидше.
+
+— Що скажеш, Люме? — прошепотіла ти.
+
+— Підемо! — пискнув він і спалахнув яскраво-золотим. — Я знаю де Ліс Загадок!
+
+Куди ти йдеш далі і чи береш кристал із собою? ✨`;
+
+createApp({
+  setup() {
+    const screen = ref("welcome");
+    const messages = ref([]);
+    const userInput = ref("");
+    const loading = ref(false);
+    const error = ref("");
+    const chatArea = ref(null);
+    const history = ref([]);
+
+    const scrollDown = async () => {
+      await nextTick();
+      if (chatArea.value) chatArea.value.scrollTop = chatArea.value.scrollHeight;
+    };
+
+    const scrollToLastNarrator = async () => {
+      await nextTick();
+      const bubbles = document.querySelectorAll('.message.narrator');
+      if (!bubbles.length) return;
+      const last = bubbles[bubbles.length - 1];
+      const headerEl = document.querySelector('.header');
+      const headerHeight = headerEl ? headerEl.offsetHeight : 0;
+      const offset = 12; // extra breathing room above the bubble
+      const top = last.getBoundingClientRect().top + window.scrollY - headerHeight - offset;
+      window.scrollTo({ top, behavior: 'smooth' });
+    };
+
+    const saveToStorage = () => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        messages: messages.value,
+        history: history.value
+      }));
+    };
+
+    const loadFromStorage = () => {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const data = JSON.parse(saved);
+          if (data.messages && data.messages.length > 0) {
+            messages.value = data.messages;
+            history.value = data.history || [];
+            screen.value = "chat";
+            return true;
+          }
+        }
+      } catch(e) {}
+      return false;
+    };
+
+    const startStory = () => {
+      messages.value = [{ role: "narrator", text: OPENING }];
+      history.value = [{ role: "assistant", content: OPENING }];
+      screen.value = "chat";
+      saveToStorage();
+      scrollDown();
+    };
+
+    const confirmRestart = () => {
+      if (confirm("Почати нову казку? Стара казка не збережеться 🔄")) {
+        localStorage.removeItem(STORAGE_KEY);
+        messages.value = [];
+        history.value = [];
+        screen.value = "welcome";
+      }
+    };
+
+    const send = async () => {
+      const text = userInput.value.trim();
+      if (!text || loading.value) return;
+
+      messages.value.push({ role: "kira", text });
+      history.value.push({ role: "user", content: text });
+      userInput.value = "";
+      loading.value = true;
+      error.value = "";
+      await scrollDown();
+
+      try {
+        const body = {
+          model: MODEL,
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            ...history.value
+          ],
+          temperature: 0.85,
+          max_tokens: 1200
+        };
+
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${API_KEY}`
+          },
+          body: JSON.stringify(body)
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err?.error?.message || `Помилка ${res.status}`);
+        }
+
+        const data = await res.json();
+        const reply = data.choices?.[0]?.message?.content;
+        if (!reply) throw new Error("Казкар замовчав... спробуй ще раз 🧚");
+
+        history.value.push({ role: "assistant", content: reply });
+        messages.value.push({ role: "narrator", text: reply });
+        saveToStorage();
+        await scrollToLastNarrator();
+
+      } catch(e) {
+        error.value = e.message || "Щось пішло не так. Спробуй ще раз ✨";
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    onMounted(() => {
+      const restored = loadFromStorage();
+      if (restored) scrollDown();
+    });
+
+    return { screen, messages, userInput, loading, error, chatArea, send, startStory, confirmRestart };
+  }
+}).mount("#app");
+</script>
+</body>
+</html>
