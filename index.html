@@ -203,8 +203,8 @@
 const { createApp, ref, nextTick, onMounted } = Vue;
 
 // ===== GROQ API =====
-const API_KEY = "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"; // gsk_...
-const API_URL = "https://api.groq.com/openai/v1/chat/completions";
+// API ключ захований у Cloudflare Worker
+const API_URL = "https://kira-book-proxy.romio-tarano-57f.workers.dev";
 const MODEL   = "meta-llama/llama-4-scout-17b-16e-instruct";
 // ====================
 
@@ -292,18 +292,6 @@ createApp({
       if (chatArea.value) chatArea.value.scrollTop = chatArea.value.scrollHeight;
     };
 
-    const scrollToLastNarrator = async () => {
-      await nextTick();
-      const bubbles = document.querySelectorAll('.message.narrator');
-      if (!bubbles.length) return;
-      const last = bubbles[bubbles.length - 1];
-      const headerEl = document.querySelector('.header');
-      const headerHeight = headerEl ? headerEl.offsetHeight : 0;
-      const offset = 12; // extra breathing room above the bubble
-      const top = last.getBoundingClientRect().top + window.scrollY - headerHeight - offset;
-      window.scrollTo({ top, behavior: 'smooth' });
-    };
-
     const saveToStorage = () => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
         messages: messages.value,
@@ -369,8 +357,7 @@ createApp({
         const res = await fetch(API_URL, {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${API_KEY}`
+            "Content-Type": "application/json"
           },
           body: JSON.stringify(body)
         });
@@ -387,12 +374,12 @@ createApp({
         history.value.push({ role: "assistant", content: reply });
         messages.value.push({ role: "narrator", text: reply });
         saveToStorage();
-        await scrollToLastNarrator();
 
       } catch(e) {
         error.value = e.message || "Щось пішло не так. Спробуй ще раз ✨";
       } finally {
         loading.value = false;
+        await scrollDown();
       }
     };
 
